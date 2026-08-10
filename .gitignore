@@ -1,6 +1,9 @@
 # key files
 Keys/
 
+# project file
+project plan - x402 data.txt
+
 # Byte-compiled / cache files
 __pycache__/
 *.py[cod]
