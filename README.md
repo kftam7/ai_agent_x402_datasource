@@ -1,2 +1,2 @@
 # ai_agent_x402_datasource
-ver1.0
+ver1.1
