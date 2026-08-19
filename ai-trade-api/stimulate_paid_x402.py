@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from web3 import Web3
 import asyncio
+
+# FIXED: Import these from the global 'x402' package, not 'cdp.x402'
 from x402 import x402Client
 from x402.http.clients import x402HttpxClient
 from x402.mechanisms.evm import EthAccountSigner
@@ -41,7 +43,7 @@ def main():
     print("="*70)
 
     print("\n[ALL RESPONSE HEADERS]")
-    for k,v in sorted(resp.headers.items()):
+    for k, v in sorted(resp.headers.items()):
         print(f"  {k}: {v}")
 
     payment_response_raw = resp.headers.get("PAYMENT-RESPONSE")
@@ -50,15 +52,15 @@ def main():
         import json
         try:
             pr_data = json.loads(payment_response_raw)
-            print(f"Decoded PAYMENT‑RESPONSE: {json.dumps(pr_data, indent=2)}")
+            print(f"Decoded PAYMENT-RESPONSE: {json.dumps(pr_data, indent=2)}")
             tx_hash = pr_data.get("tx_hash")
             if tx_hash:
                 print(f"\n✅ Transaction hash: {tx_hash}")
-                print(f"🔗 Base‑Sepolia Block Explorer: https://sepolia.basescan.org/tx/{tx_hash}")
+                print(f"🔗 Base-Sepolia Block Explorer: https://sepolia.basescan.org/tx/{tx_hash}")
         except Exception as e:
-            print(f"Cannot decode PAYMENT‑RESPONSE JSON: {e}, raw={payment_response_raw}")
+            print(f"Cannot decode PAYMENT-RESPONSE JSON: {e}, raw={payment_response_raw}")
     else:
-        print("⚠️ PAYMENT‑RESPONSE header NOT present")
+        print("⚠️ PAYMENT-RESPONSE header NOT present")
 
     print("\n[RESPONSE JSON BODY]")
     print(resp.text)

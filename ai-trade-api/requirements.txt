@@ -6,3 +6,6 @@ slowapi
 pandas
 openpyxl
 requests
+httpx
+web3
+cdp-sdk
