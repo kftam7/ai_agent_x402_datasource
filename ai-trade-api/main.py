@@ -88,7 +88,7 @@ _facilitator_cfg = create_facilitator_config(
 X402_FACILITATOR_URL = _facilitator_cfg["url"]
 _create_x402_headers = _facilitator_cfg["create_headers"]
 
-print("\n==== X402 ENV STARTUP DEBUG ====")
+print("\n==== X402 ENV STARTUP DEBUG ====", flush=True)
 print(f"X402_ENABLED: {X402_ENABLED}")
 print(
     f"CDP_API_KEY_ID loaded: {bool(CDP_API_KEY_ID)}, "
@@ -102,7 +102,7 @@ print(f"X402_FACILITATOR_URL: {X402_FACILITATOR_URL}")
 print(f"X402_WALLET_ADDRESS: {X402_WALLET_ADDRESS}")
 print(f"X402_NETWORK_CAIP2: {X402_NETWORK_CAIP2}")
 print(f"X402_PROTOCOL_VERSION: {X402_PROTOCOL_VERSION}")
-print("================================\n")
+print("================================\n", flush=True)
 
 
 # ---------------------------------------------------------------------------
@@ -248,7 +248,7 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
     try:
         # ---------- /verify ----------
         verify_url = f"{X402_FACILITATOR_URL}/verify"
-        print("\n==== CDP REQUEST DEBUG /verify ====")
+        print("\n==== CDP REQUEST DEBUG /verify ====", flush=True)
         print(f"POST URL: {verify_url}")
         print(f"Request header keys: {list(op_headers['verify'].keys())}")
         print(f"Body keys: {list(body.keys())}")
@@ -260,7 +260,7 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         )
         print(f"Response status: {resp_verify.status_code}")
         print(f"Response body: {resp_verify.text[:800]}")
-        print("====================================\n")
+        print("====================================\n", flush=True)
 
         if resp_verify.status_code == 401:
             audit_payment(request_path, payment_header_raw, verify_success=False)
@@ -280,7 +280,7 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
 
         # ---------- /settle ----------
         settle_url = f"{X402_FACILITATOR_URL}/settle"
-        print("\n==== CDP REQUEST DEBUG /settle ====")
+        print("\n==== CDP REQUEST DEBUG /settle ====", flush=True)
         print(f"POST URL: {settle_url}")
         resp_settle = requests.post(
             settle_url,
@@ -290,7 +290,7 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         )
         print(f"Response status: {resp_settle.status_code}")
         print(f"Response body: {resp_settle.text[:800]}")
-        print("====================================\n")
+        print("====================================\n", flush=True)
 
         if resp_settle.status_code == 401:
             audit_payment(request_path, payment_header_raw, verify_success=True, settle_success=False)
