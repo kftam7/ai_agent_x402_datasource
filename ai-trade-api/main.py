@@ -1,6 +1,11 @@
 """
 AI Hardware Trade Data API with CDP x402 facilitator (JWT auth).
 Fix: Decimal + datetime JSON serialization, pure ASCII hyphens, full audit.
+Changelog:
+- Fixed double JSON serialization (root cause of escaped backslash JSON output)
+- Preserved all original X402 / DB / rate-limit / auth logic
+- Cleaned JSONResponse handling, removed manual json.dumps on final payload
+- Kept Decimal + datetime auto serialization via custom encoder
 """
 import os
 import json
@@ -8,7 +13,6 @@ import base64
 from decimal import Decimal
 from datetime import datetime
 from typing import Any
-
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Header, Depends
@@ -19,11 +23,9 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import psycopg2
 from psycopg2.extras import RealDictCursor
-
 from cdp.x402 import create_facilitator_config
 
 load_dotenv()
-
 app = FastAPI(title="AI Hardware Trade Data API")
 
 # Rate limiter
@@ -40,7 +42,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Custom JSON encoder for PostgreSQL Decimal and datetime types
 class DecimalDatetimeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -50,6 +51,14 @@ class DecimalDatetimeEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super().default(obj)
 
+# Custom JSONResponse to auto apply our encoder globally
+class CustomJSONResponse(JSONResponse):
+    def render(self, content: Any) -> bytes:
+        return json.dumps(
+            content,
+            cls=DecimalDatetimeEncoder,
+            ensure_ascii=True,
+        ).encode("utf-8")
 
 # ---------------------------------------------------------------------------
 # Database
@@ -63,13 +72,11 @@ def get_db_conn():
         password=os.getenv("DB_PASSWORD"),
     )
 
-
 # ---------------------------------------------------------------------------
 # X402 / CDP config (prefer official CDP_* names; fall back to old COINBASE_*)
 # ---------------------------------------------------------------------------
 CDP_API_KEY_ID = os.getenv("CDP_API_KEY_ID") or os.getenv("COINBASE_API_KEY_ID") or ""
 CDP_API_KEY_SECRET = os.getenv("CDP_API_KEY_SECRET") or os.getenv("COINBASE_API_SECRET") or ""
-
 X402_ENABLED = os.getenv("X402_ENABLED", "False").lower() == "true"
 X402_WALLET_ADDRESS = os.getenv("X402_WALLET_ADDRESS", "")
 X402_NETWORK_CAIP2 = os.getenv("X402_NETWORK_CAIP2", "eip155:84532")  # Base Sepolia default
@@ -104,7 +111,6 @@ print(f"X402_NETWORK_CAIP2: {X402_NETWORK_CAIP2}")
 print(f"X402_PROTOCOL_VERSION: {X402_PROTOCOL_VERSION}")
 print("================================\n", flush=True)
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -121,7 +127,6 @@ def get_payment_requirements() -> dict[str, Any]:
     if X402_PROTOCOL_VERSION >= 2:
         req["extra"] = {"name": X402_ASSET_NAME, "version": X402_ASSET_VERSION}
     return req
-
 
 def get_x402_challenge_payload(resource_url: str) -> dict[str, Any]:
     """Body/detail for HTTP 402 when payment is missing."""
@@ -147,7 +152,6 @@ def get_x402_challenge_payload(resource_url: str) -> dict[str, Any]:
         "accepts": [accepts],
     }
 
-
 def decode_payment_header(raw: str) -> dict[str, Any]:
     """
     Client sends PAYMENT-SIGNATURE (v2) or X-PAYMENT (v1) as base64 JSON,
@@ -169,7 +173,6 @@ def decode_payment_header(raw: str) -> dict[str, Any]:
             status_code=400,
             detail=f"Invalid payment header: not base64 JSON or JSON ({e})",
         )
-
 
 def audit_payment(
     request_path: str,
@@ -207,7 +210,6 @@ def audit_payment(
         cur.close()
         conn.close()
 
-
 def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
     """
     Decode client payment header, call CDP facilitator /verify then /settle
@@ -215,7 +217,6 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
     """
     if not X402_ENABLED:
         return True, None
-
     required = [
         CDP_API_KEY_ID,
         CDP_API_KEY_SECRET,
@@ -226,25 +227,20 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
     ]
     if not all(required):
         raise HTTPException(status_code=503, detail="X402 configuration incomplete on server")
-
     payment_payload = decode_payment_header(payment_header_raw)
     payment_requirements = get_payment_requirements()
-
     # Ensure version on payload if client omitted it
     if "x402Version" not in payment_payload:
         payment_payload = {**payment_payload, "x402Version": X402_PROTOCOL_VERSION}
-
     body = {
         "x402Version": payment_payload.get("x402Version", X402_PROTOCOL_VERSION),
         "paymentPayload": payment_payload,
         "paymentRequirements": payment_requirements,
     }
-
     op_headers = _create_x402_headers()
     settle_tx_hash = None
     settle_ok = False
     settle_err_msg = None
-
     try:
         # ---------- /verify ----------
         verify_url = f"{X402_FACILITATOR_URL}/verify"
@@ -261,23 +257,19 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         print(f"Response status: {resp_verify.status_code}")
         print(f"Response body: {resp_verify.text[:800]}")
         print("====================================\n", flush=True)
-
         if resp_verify.status_code == 401:
             audit_payment(request_path, payment_header_raw, verify_success=False)
             raise HTTPException(
                 status_code=503,
                 detail="X402 facilitator auth failed (401). Check CDP_API_KEY_ID / CDP_API_KEY_SECRET.",
             )
-
         data_verify = resp_verify.json() if resp_verify.text else {}
         # CDP uses isValid (v2); some older responses used valid
         is_valid = data_verify.get("isValid", data_verify.get("valid", False))
-
         if resp_verify.status_code >= 400 or not is_valid:
             audit_payment(request_path, payment_header_raw, verify_success=False)
             reason = data_verify.get("invalidReason") or data_verify.get("errorMessage") or resp_verify.text
             raise HTTPException(status_code=402, detail=f"X402 payment invalid: {reason}")
-
         # ---------- /settle ----------
         settle_url = f"{X402_FACILITATOR_URL}/settle"
         print("\n==== CDP REQUEST DEBUG /settle ====", flush=True)
@@ -291,11 +283,9 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         print(f"Response status: {resp_settle.status_code}")
         print(f"Response body: {resp_settle.text[:800]}")
         print("====================================\n", flush=True)
-
         if resp_settle.status_code == 401:
             audit_payment(request_path, payment_header_raw, verify_success=True, settle_success=False)
             raise HTTPException(status_code=503, detail="X402 settle auth failed (401)")
-
         data_settle = resp_settle.json() if resp_settle.text else {}
         settle_ok = bool(
             data_settle.get("success")
@@ -307,7 +297,6 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
             or data_settle.get("tx_hash")
             or data_settle.get("txHash")
         )
-
         if resp_settle.status_code >= 400 or not settle_ok:
             settle_err_msg = (
                 data_settle.get("errorReason")
@@ -322,7 +311,6 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
                 settle_error=settle_err_msg,
             )
             raise HTTPException(status_code=402, detail=f"X402 settle failed: {settle_err_msg}")
-
     except HTTPException:
         raise
     except requests.exceptions.RequestException as e:
@@ -333,7 +321,6 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         settle_err_msg = str(e)
         audit_payment(request_path, payment_header_raw, verify_success=False, settle_error=settle_err_msg)
         raise HTTPException(status_code=503, detail=f"X402 error: {settle_err_msg}")
-
     audit_payment(
         request_path=request_path,
         payment_header=payment_header_raw,
@@ -343,7 +330,6 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         settle_error=None,
     )
     return True, settle_tx_hash
-
 
 def validate_api_key(api_key: str):
     conn = get_db_conn()
@@ -364,7 +350,6 @@ def validate_api_key(api_key: str):
         raise HTTPException(status_code=401, detail="Invalid or inactive api key")
     return row
 
-
 async def auth_dependency(
     request: Request,
     x_api_key: str | None = Header(default=None, alias="X-API-Key"),
@@ -377,7 +362,6 @@ async def auth_dependency(
     # 1) Classic API key
     if x_api_key is not None:
         return {"is_x402": False, "tx_hash": None}
-
     # 2) x402 payment header
     payment_header = payment_signature or x_payment or x402
     if X402_ENABLED and payment_header is not None:
@@ -385,7 +369,6 @@ async def auth_dependency(
         if is_valid:
             return {"is_x402": True, "tx_hash": tx_hash}
         raise HTTPException(status_code=402, detail="X402 payment invalid or not settled")
-
     # 3) No auth → 402 challenge
     challenge = get_x402_challenge_payload(str(request.url))
     # Protocol-friendly: also put requirements in PAYMENT-REQUIRED (base64)
@@ -393,12 +376,10 @@ async def auth_dependency(
         pr_b64 = base64.b64encode(json.dumps(challenge).encode()).decode()
     except Exception:
         pr_b64 = None
-
     headers = {}
     if pr_b64:
         headers["PAYMENT-REQUIRED"] = pr_b64
     raise HTTPException(status_code=402, detail=challenge, headers=headers)
-
 
 # ---------------------------------------------------------------------------
 # Routes
@@ -423,19 +404,13 @@ async def get_monthly_data(
         conn.close()
     if not record:
         raise HTTPException(status_code=404, detail="No data for given month")
-
     payload = {"data": dict(record)}
-    # Serialize with encoder supporting Decimal + datetime
-    json_body = json.dumps(payload, cls=DecimalDatetimeEncoder)
-    resp = JSONResponse(content=json_body, media_type="application/json")
-
+    resp = CustomJSONResponse(content=payload)
     # Inject PAYMENT-RESPONSE header only for X402 payment flow
     if auth.get("is_x402") and auth.get("tx_hash"):
         payment_response_obj = json.dumps({"tx_hash": auth["tx_hash"]})
         resp.headers["PAYMENT-RESPONSE"] = payment_response_obj
-
     return resp
-
 
 @app.get("/health")
 async def health_check():
@@ -447,7 +422,6 @@ async def health_check():
         "network": X402_NETWORK_CAIP2,
         "protocol_version": X402_PROTOCOL_VERSION,
     }
-
 
 if __name__ == "__main__":
     import uvicorn
