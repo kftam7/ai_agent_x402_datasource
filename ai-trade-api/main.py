@@ -6,6 +6,11 @@ Changelog:
 - Preserved all original X402 / DB / rate-limit / auth logic
 - Cleaned JSONResponse handling, removed manual json.dumps on final payload
 - Kept Decimal + datetime auto serialization via custom encoder
+- Critical Fix: Typo on X402_ASSET_CONTRACT env var name
+- Added full raw payload debug printed BEFORE sending to CDP /verify
+- Added explicit logging of paymentPayload and paymentRequirements for troubleshooting invalid_payload revert
+- Improved error granularity
+- Fixed request.url type issue when passing to audit
 """
 import os
 import json
@@ -26,6 +31,7 @@ from psycopg2.extras import RealDictCursor
 from cdp.x402 import create_facilitator_config
 
 load_dotenv()
+
 app = FastAPI(title="AI Hardware Trade Data API")
 
 # Rate limiter
@@ -109,6 +115,8 @@ print(f"X402_FACILITATOR_URL: {X402_FACILITATOR_URL}")
 print(f"X402_WALLET_ADDRESS: {X402_WALLET_ADDRESS}")
 print(f"X402_NETWORK_CAIP2: {X402_NETWORK_CAIP2}")
 print(f"X402_PROTOCOL_VERSION: {X402_PROTOCOL_VERSION}")
+print(f"X402_ASSET_CONTRACT: {X402_ASSET_CONTRACT}")
+print(f"X402_AMOUNT_ATOMIC: {X402_AMOUNT_ATOMIC}")
 print("================================\n", flush=True)
 
 # ---------------------------------------------------------------------------
@@ -177,6 +185,10 @@ def decode_payment_header(raw: str) -> dict[str, Any]:
 def audit_payment(
     request_path: str,
     payment_header: str,
+    network_caip2: str,
+    asset_contract: str,
+    amount_atomic: str,
+    wallet_payto: str,
     verify_success: bool,
     settle_success: bool = False,
     settle_tx_hash: str | None = None,
@@ -195,10 +207,10 @@ def audit_payment(
             (
                 request_path,
                 payment_header,
-                X402_NETWORK_CAIP2,
-                X402_ASSET_CONTRACT,
-                X402_AMOUNT_ATOMIC,
-                X402_WALLET_ADDRESS,
+                network_caip2,
+                asset_contract,
+                amount_atomic,
+                wallet_payto,
                 verify_success,
                 settle_success,
                 settle_tx_hash,
@@ -237,6 +249,10 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         "paymentPayload": payment_payload,
         "paymentRequirements": payment_requirements,
     }
+    # ########## IMPORTANT DEBUG PRINT (this will show raw payload sent to CDP)
+    print("\n==== FINAL FULL BODY SENT TO CDP /verify ====", flush=True)
+    print(json.dumps(body, indent=2))
+    print("=============================================\n", flush=True)
     op_headers = _create_x402_headers()
     settle_tx_hash = None
     settle_ok = False
@@ -255,10 +271,14 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
             timeout=12,
         )
         print(f"Response status: {resp_verify.status_code}")
-        print(f"Response body: {resp_verify.text[:800]}")
+        print(f"Response body: {resp_verify.text[:1200]}")
         print("====================================\n", flush=True)
         if resp_verify.status_code == 401:
-            audit_payment(request_path, payment_header_raw, verify_success=False)
+            audit_payment(
+                request_path, payment_header_raw,
+                X402_NETWORK_CAIP2, X402_ASSET_CONTRACT, X402_AMOUNT_ATOMIC, X402_WALLET_ADDRESS,
+                verify_success=False
+            )
             raise HTTPException(
                 status_code=503,
                 detail="X402 facilitator auth failed (401). Check CDP_API_KEY_ID / CDP_API_KEY_SECRET.",
@@ -267,7 +287,11 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         # CDP uses isValid (v2); some older responses used valid
         is_valid = data_verify.get("isValid", data_verify.get("valid", False))
         if resp_verify.status_code >= 400 or not is_valid:
-            audit_payment(request_path, payment_header_raw, verify_success=False)
+            audit_payment(
+                request_path, payment_header_raw,
+                X402_NETWORK_CAIP2, X402_ASSET_CONTRACT, X402_AMOUNT_ATOMIC, X402_WALLET_ADDRESS,
+                verify_success=False
+            )
             reason = data_verify.get("invalidReason") or data_verify.get("errorMessage") or resp_verify.text
             raise HTTPException(status_code=402, detail=f"X402 payment invalid: {reason}")
         # ---------- /settle ----------
@@ -281,10 +305,14 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
             timeout=30,
         )
         print(f"Response status: {resp_settle.status_code}")
-        print(f"Response body: {resp_settle.text[:800]}")
+        print(f"Response body: {resp_settle.text[:1200]}")
         print("====================================\n", flush=True)
         if resp_settle.status_code == 401:
-            audit_payment(request_path, payment_header_raw, verify_success=True, settle_success=False)
+            audit_payment(
+                request_path, payment_header_raw,
+                X402_NETWORK_CAIP2, X402_ASSET_CONTRACT, X402_AMOUNT_ATOMIC, X402_WALLET_ADDRESS,
+                verify_success=True, settle_success=False
+            )
             raise HTTPException(status_code=503, detail="X402 settle auth failed (401)")
         data_settle = resp_settle.json() if resp_settle.text else {}
         settle_ok = bool(
@@ -306,6 +334,10 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
             audit_payment(
                 request_path,
                 payment_header_raw,
+                X402_NETWORK_CAIP2,
+                X402_ASSET_CONTRACT,
+                X402_AMOUNT_ATOMIC,
+                X402_WALLET_ADDRESS,
                 verify_success=True,
                 settle_success=False,
                 settle_error=settle_err_msg,
@@ -315,15 +347,27 @@ def verify_and_settle_x402_payment(payment_header_raw: str, request_path: str):
         raise
     except requests.exceptions.RequestException as e:
         settle_err_msg = str(e)
-        audit_payment(request_path, payment_header_raw, verify_success=False, settle_error=settle_err_msg)
+        audit_payment(
+            request_path, payment_header_raw,
+            X402_NETWORK_CAIP2, X402_ASSET_CONTRACT, X402_AMOUNT_ATOMIC, X402_WALLET_ADDRESS,
+            verify_success=False, settle_error=settle_err_msg
+        )
         raise HTTPException(status_code=503, detail=f"X402 facilitator error: {settle_err_msg}")
     except Exception as e:
         settle_err_msg = str(e)
-        audit_payment(request_path, payment_header_raw, verify_success=False, settle_error=settle_err_msg)
+        audit_payment(
+            request_path, payment_header_raw,
+            X402_NETWORK_CAIP2, X402_ASSET_CONTRACT, X402_AMOUNT_ATOMIC, X402_WALLET_ADDRESS,
+            verify_success=False, settle_error=settle_err_msg
+        )
         raise HTTPException(status_code=503, detail=f"X402 error: {settle_err_msg}")
     audit_payment(
         request_path=request_path,
         payment_header=payment_header_raw,
+        network_caip2=X402_NETWORK_CAIP2,
+        asset_contract=X402_ASSET_CONTRACT,
+        amount_atomic=X402_AMOUNT_ATOMIC,
+        wallet_payto=X402_WALLET_ADDRESS,
         verify_success=True,
         settle_success=settle_ok,
         settle_tx_hash=settle_tx_hash,
@@ -421,6 +465,7 @@ async def health_check():
         "key_id_loaded": bool(CDP_API_KEY_ID),
         "network": X402_NETWORK_CAIP2,
         "protocol_version": X402_PROTOCOL_VERSION,
+        "asset_contract": X402_ASSET_CONTRACT
     }
 
 if __name__ == "__main__":
