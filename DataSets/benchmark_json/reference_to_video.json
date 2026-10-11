@@ -1,0 +1,110 @@
+[
+  {
+    "rank": 1,
+    "model": "Seedance 2.0 [720p]",
+    "organization": "ByteDance",
+    "rank_score": 1134.6,
+    "ci_95": "+31.2/-30.3",
+    "battles": 2464,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 2,
+    "model": "Veo 3.1 [720p]",
+    "organization": "Google",
+    "rank_score": 1119.6,
+    "ci_95": "+21.3/-18.4",
+    "battles": 5604,
+    "release_date": "2025.10"
+  },
+  {
+    "rank": 3,
+    "model": "可灵 3.0 Omni [1080p]",
+    "organization": "Kuaishou Technology",
+    "rank_score": 1116.0,
+    "ci_95": "+19.8/-20.4",
+    "battles": 6071,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 4,
+    "model": "Vidu Q2 [720p]",
+    "organization": "Shengshu Technology",
+    "rank_score": 1114.6,
+    "ci_95": "+19.4/-19.6",
+    "battles": 6585,
+    "release_date": "2025.09"
+  },
+  {
+    "rank": 5,
+    "model": "Wan 2.7 [1080p]",
+    "organization": "Alibaba",
+    "rank_score": 1083.6,
+    "ci_95": "+23.3/-24.0",
+    "battles": 3877,
+    "release_date": "2026.04"
+  },
+  {
+    "rank": 6,
+    "model": "HappyHorse-1.0 [1080p]",
+    "organization": "Alibaba",
+    "rank_score": 1045.3,
+    "ci_95": "+28.0/-23.0",
+    "battles": 3375,
+    "release_date": "2026.04"
+  },
+  {
+    "rank": 7,
+    "model": "可灵 O1（2025-12-15） [1080p]",
+    "organization": "Kuaishou Technology",
+    "rank_score": 1034.4,
+    "ci_95": "+18.2/-19.3",
+    "battles": 6575,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 8,
+    "model": "Vidu Q3 [540p]",
+    "organization": "Shengshu Technology",
+    "rank_score": 1008.1,
+    "ci_95": "+23.4/-22.5",
+    "battles": 4048,
+    "release_date": "2026.04"
+  },
+  {
+    "rank": 9,
+    "model": "vivago2.0（智小象AI） [1080p]",
+    "organization": "Zixiang Future",
+    "rank_score": 886.1,
+    "ci_95": "+17.3/-16.9",
+    "battles": 6370,
+    "release_date": "2025.07"
+  },
+  {
+    "rank": 10,
+    "model": "可灵 1.6 [1080p]",
+    "organization": "Kuaishou Technology",
+    "rank_score": 885.2,
+    "ci_95": "+17.5/-19.0",
+    "battles": 6598,
+    "release_date": "2025.01"
+  },
+  {
+    "rank": 11,
+    "model": "PixVerse V5 [540p]",
+    "organization": "Aishi Technology",
+    "rank_score": 818.8,
+    "ci_95": "+19.8/-20.4",
+    "battles": 5921,
+    "release_date": "2025.08"
+  },
+  {
+    "rank": 12,
+    "model": "Seedance 1.0 lite [1248x704]",
+    "organization": "ByteDance",
+    "rank_score": 753.3,
+    "ci_95": "+20.1/-20.5",
+    "battles": 6614,
+    "release_date": "2025.04"
+  }
+]

@@ -1,0 +1,227 @@
+[
+  {
+    "rank": 1,
+    "model": "GPT-Image-2",
+    "organization": "OpenAI",
+    "rank_score": 1418.7,
+    "ci_95": "+21.3/-22.3",
+    "battles": 5287,
+    "release_date": "2026.04"
+  },
+  {
+    "rank": 2,
+    "model": "Gemini-3.1-Flash-Image-Preview (Nano Banana 2)",
+    "organization": "Google",
+    "rank_score": 1329.7,
+    "ci_95": "+19.1/-19.1",
+    "battles": 8654,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 3,
+    "model": "Seedream 5.0 Pro",
+    "organization": "ByteDance",
+    "rank_score": 1297.5,
+    "ci_95": "+28.7/-27.3",
+    "battles": 3381,
+    "release_date": "2026.07"
+  },
+  {
+    "rank": 4,
+    "model": "Qwen-Image-3.0-Pro",
+    "organization": "Alibaba",
+    "rank_score": 1251.7,
+    "ci_95": "+65.1/-62.4",
+    "battles": 644,
+    "release_date": null
+  },
+  {
+    "rank": 5,
+    "model": "Gemini-3-Pro-Image-Preview (Nano Banana Pro)",
+    "organization": "Google",
+    "rank_score": 1219.7,
+    "ci_95": "+24.2/-23.9",
+    "battles": 4279,
+    "release_date": "2025.11"
+  },
+  {
+    "rank": 6,
+    "model": "GPT-Image-1.5",
+    "organization": "OpenAI",
+    "rank_score": 1168.2,
+    "ci_95": "+18.8/-19.2",
+    "battles": 7341,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 7,
+    "model": "Seedream 4.5",
+    "organization": "ByteDance",
+    "rank_score": 1102.2,
+    "ci_95": "+25.1/-24.0",
+    "battles": 4211,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 8,
+    "model": "Qwen-Image-2.0-Pro（2026-03-03）",
+    "organization": "Alibaba",
+    "rank_score": 1087.5,
+    "ci_95": "+19.4/-18.0",
+    "battles": 7962,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 9,
+    "model": "Seedream 4.0",
+    "organization": "ByteDance",
+    "rank_score": 1036.0,
+    "ci_95": "+21.0/-23.3",
+    "battles": 4896,
+    "release_date": "2025.09"
+  },
+  {
+    "rank": 10,
+    "model": "HunyuanImage 3.0",
+    "organization": "Tencent",
+    "rank_score": 1022.9,
+    "ci_95": "+21.0/-23.4",
+    "battles": 4876,
+    "release_date": "2025.09"
+  },
+  {
+    "rank": 11,
+    "model": "Seedream 3.0",
+    "organization": "ByteDance",
+    "rank_score": 991.6,
+    "ci_95": "+21.3/-23.0",
+    "battles": 4979,
+    "release_date": "2025.04"
+  },
+  {
+    "rank": 12,
+    "model": "Wan 2.6（2026-1-1）",
+    "organization": "Alibaba",
+    "rank_score": 980.1,
+    "ci_95": "+20.1/-21.1",
+    "battles": 6175,
+    "release_date": "2026.01"
+  },
+  {
+    "rank": 13,
+    "model": "SenseNova U1.5 Lite",
+    "organization": "SenseTime",
+    "rank_score": 958.7,
+    "ci_95": "+62.4/-62.7",
+    "battles": 671,
+    "release_date": null
+  },
+  {
+    "rank": 14,
+    "model": "Qwen-Image",
+    "organization": "Alibaba",
+    "rank_score": 955.5,
+    "ci_95": "+22.0/-23.5",
+    "battles": 4866,
+    "release_date": "2025.04"
+  },
+  {
+    "rank": 15,
+    "model": "Z-Image-Turbo",
+    "organization": "Alibaba",
+    "rank_score": 948.7,
+    "ci_95": "+25.7/-24.6",
+    "battles": 4108,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 16,
+    "model": "Wan 2.6（2025-12-16）",
+    "organization": "Alibaba",
+    "rank_score": 912.8,
+    "ci_95": "+17.6/-17.8",
+    "battles": 7895,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 17,
+    "model": "Seedream 5.0 Lite",
+    "organization": "ByteDance",
+    "rank_score": 906.3,
+    "ci_95": "+17.0/-17.5",
+    "battles": 8623,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 18,
+    "model": "GPT-Image-1",
+    "organization": "OpenAI",
+    "rank_score": 903.1,
+    "ci_95": "+22.3/-21.5",
+    "battles": 4932,
+    "release_date": "2025.04"
+  },
+  {
+    "rank": 19,
+    "model": "可图 2.1",
+    "organization": "Kuaishou Technology",
+    "rank_score": 901.1,
+    "ci_95": "+22.7/-24.1",
+    "battles": 4818,
+    "release_date": "2025.07"
+  },
+  {
+    "rank": 20,
+    "model": "Imagen-4.0-Ultra",
+    "organization": "Google",
+    "rank_score": 896.7,
+    "ci_95": "+20.9/-23.1",
+    "battles": 4864,
+    "release_date": "2025.06"
+  },
+  {
+    "rank": 21,
+    "model": "ERNIE-iRAG-1.0",
+    "organization": "Baidu",
+    "rank_score": 838.3,
+    "ci_95": "+22.3/-22.5",
+    "battles": 4882,
+    "release_date": "2025.02"
+  },
+  {
+    "rank": 22,
+    "model": "wan2.2-t2i-plus",
+    "organization": "Alibaba",
+    "rank_score": 758.2,
+    "ci_95": "+23.3/-23.2",
+    "battles": 4905,
+    "release_date": "2025.07"
+  },
+  {
+    "rank": 23,
+    "model": "GLM-Image",
+    "organization": "Zhipu AI",
+    "rank_score": 718.4,
+    "ci_95": "+21.9/-21.5",
+    "battles": 6095,
+    "release_date": "2026.01"
+  },
+  {
+    "rank": 24,
+    "model": "wanx2.1-t2i-plus",
+    "organization": "Alibaba",
+    "rank_score": 707.7,
+    "ci_95": "+23.7/-23.5",
+    "battles": 4933,
+    "release_date": "2025.01"
+  },
+  {
+    "rank": 25,
+    "model": "CogView-4-250304",
+    "organization": "Zhipu AI",
+    "rank_score": 691.2,
+    "ci_95": "+22.9/-24.5",
+    "battles": 4933,
+    "release_date": "2025.03"
+  }
+]

@@ -1,0 +1,146 @@
+[
+  {
+    "rank": 1,
+    "model": "Gemini-3.1-Flash-Image-Preview (Nano Banana 2)",
+    "organization": "Google",
+    "rank_score": 1235.7,
+    "ci_95": "+15.3/-14.9",
+    "battles": 10248,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 2,
+    "model": "GPT-Image-2",
+    "organization": "OpenAI",
+    "rank_score": 1210.0,
+    "ci_95": "+16.1/-15.5",
+    "battles": 10876,
+    "release_date": "2026.04"
+  },
+  {
+    "rank": 3,
+    "model": "Seedream 5.0 Pro",
+    "organization": "ByteDance",
+    "rank_score": 1208.4,
+    "ci_95": "+19.4/-19.3",
+    "battles": 6095,
+    "release_date": "2026.07"
+  },
+  {
+    "rank": 4,
+    "model": "Gemini-3-Pro-Image-Preview (Nano Banana Pro)",
+    "organization": "Google",
+    "rank_score": 1182.3,
+    "ci_95": "+16.5/-15.7",
+    "battles": 11062,
+    "release_date": "2025.11"
+  },
+  {
+    "rank": 5,
+    "model": "GPT-Image-1.5",
+    "organization": "OpenAI",
+    "rank_score": 1103.0,
+    "ci_95": "+14.5/-15.0",
+    "battles": 12540,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 6,
+    "model": "Qwen-Image-3.0-Pro",
+    "organization": "Alibaba",
+    "rank_score": 1076.3,
+    "ci_95": "+44.6/-45.9",
+    "battles": 1024,
+    "release_date": null
+  },
+  {
+    "rank": 7,
+    "model": "Seedream 4.5",
+    "organization": "ByteDance",
+    "rank_score": 1020.4,
+    "ci_95": "+15.8/-16.1",
+    "battles": 10815,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 8,
+    "model": "Seedream 5.0 Lite",
+    "organization": "ByteDance",
+    "rank_score": 997.9,
+    "ci_95": "+15.3/-15.4",
+    "battles": 10493,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 9,
+    "model": "Qwen-Image-2.0-Pro（2026-03-03）",
+    "organization": "Alibaba",
+    "rank_score": 980.8,
+    "ci_95": "+16.1/-15.3",
+    "battles": 10145,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 10,
+    "model": "Wan 2.6（2025-12-16）",
+    "organization": "Alibaba",
+    "rank_score": 930.7,
+    "ci_95": "+13.2/-13.8",
+    "battles": 13376,
+    "release_date": "2025.12"
+  },
+  {
+    "rank": 11,
+    "model": "SenseNova U1.5 Lite",
+    "organization": "SenseTime",
+    "rank_score": 924.3,
+    "ci_95": "+43.5/-45.0",
+    "battles": 1063,
+    "release_date": null
+  },
+  {
+    "rank": 12,
+    "model": "Gemini-2.5-Flash-Image-Preview (Nano Banana)",
+    "organization": "Google",
+    "rank_score": 869.9,
+    "ci_95": "+12.9/-12.4",
+    "battles": 19960,
+    "release_date": "2025.08"
+  },
+  {
+    "rank": 13,
+    "model": "GPT-Image-1",
+    "organization": "OpenAI",
+    "rank_score": 866.6,
+    "ci_95": "+11.8/-12.7",
+    "battles": 20056,
+    "release_date": "2025.04"
+  },
+  {
+    "rank": 14,
+    "model": "Seedream 4.0",
+    "organization": "ByteDance",
+    "rank_score": 860.4,
+    "ci_95": "+11.6/-13.0",
+    "battles": 19972,
+    "release_date": "2025.09"
+  },
+  {
+    "rank": 15,
+    "model": "Qwen-Image-Edit",
+    "organization": "Alibaba",
+    "rank_score": 832.1,
+    "ci_95": "+13.3/-12.2",
+    "battles": 20027,
+    "release_date": "2025.08"
+  },
+  {
+    "rank": 16,
+    "model": "Doubao-Seededit-3.0-i2i",
+    "organization": "ByteDance",
+    "rank_score": 702.4,
+    "ci_95": "+12.9/-13.1",
+    "battles": 20306,
+    "release_date": "2025.06"
+  }
+]

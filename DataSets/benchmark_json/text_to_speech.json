@@ -1,0 +1,74 @@
+[
+  {
+    "rank": 1,
+    "model": "Doubao-Seed-TTS 2.0",
+    "organization": "ByteDance",
+    "rank_score": 1237.9,
+    "ci_95": "+21.2/-20.8",
+    "battles": 5256,
+    "release_date": "2025.10"
+  },
+  {
+    "rank": 2,
+    "model": "讯飞-超拟人语音合成",
+    "organization": "iFlytek",
+    "rank_score": 1206.1,
+    "ci_95": "+20.3/-20.1",
+    "battles": 5250,
+    "release_date": "2024.08"
+  },
+  {
+    "rank": 3,
+    "model": "Speech-2.6-HD",
+    "organization": "MiniMax",
+    "rank_score": 1106.6,
+    "ci_95": "+21.1/-20.2",
+    "battles": 4571,
+    "release_date": "2025.10"
+  },
+  {
+    "rank": 4,
+    "model": "Qwen3-TTS-Flash",
+    "organization": "Alibaba",
+    "rank_score": 1049.1,
+    "ci_95": "+20.6/-19.6",
+    "battles": 5260,
+    "release_date": "2025.09"
+  },
+  {
+    "rank": 5,
+    "model": "Azure Neural",
+    "organization": "Microsoft Azure",
+    "rank_score": 1022.4,
+    "ci_95": "+19.2/-20.1",
+    "battles": 5220,
+    "release_date": "2025.10"
+  },
+  {
+    "rank": 6,
+    "model": "gemini-2.5-flash-preview-tts",
+    "organization": "Google",
+    "rank_score": 921.6,
+    "ci_95": "+19.5/-18.7",
+    "battles": 5178,
+    "release_date": "2025.05"
+  },
+  {
+    "rank": 7,
+    "model": "百度智能云-语音合成",
+    "organization": "Baidu",
+    "rank_score": 802.8,
+    "ci_95": "+19.1/-20.8",
+    "battles": 5131,
+    "release_date": "2025.10"
+  },
+  {
+    "rank": 8,
+    "model": "GPT-4o mini TTS",
+    "organization": "OpenAI",
+    "rank_score": 653.6,
+    "ci_95": "+20.4/-21.5",
+    "battles": 5298,
+    "release_date": "2025.03"
+  }
+]

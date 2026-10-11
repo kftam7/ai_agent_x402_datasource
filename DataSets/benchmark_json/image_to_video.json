@@ -1,0 +1,89 @@
+[
+  {
+    "rank": 1,
+    "model": "MiniMax H3 [768p]",
+    "organization": "MiniMax",
+    "rank_score": 1233.6,
+    "ci_95": "+76.9/-88.5",
+    "battles": 361,
+    "release_date": "2026-07-31"
+  },
+  {
+    "rank": 2,
+    "model": "Seedance 2.0 [720p]",
+    "organization": "ByteDance",
+    "rank_score": 1187.9,
+    "ci_95": "+39.6/-35.5",
+    "battles": 1695,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 3,
+    "model": "Seedance 2.5 [720p]",
+    "organization": "ByteDance",
+    "rank_score": 1156.9,
+    "ci_95": "+87.4/-87.5",
+    "battles": 329,
+    "release_date": "2026-07-31"
+  },
+  {
+    "rank": 4,
+    "model": "Vidu Q3 [1080p]",
+    "organization": "Shengshu Technology",
+    "rank_score": 1154.1,
+    "ci_95": "+27.5/-24.2",
+    "battles": 3951,
+    "release_date": "2026.01"
+  },
+  {
+    "rank": 5,
+    "model": "可灵 3.0 [720p]",
+    "organization": "Kuaishou Technology",
+    "rank_score": 1146.6,
+    "ci_95": "+24.2/-27.4",
+    "battles": 3823,
+    "release_date": "2026.02"
+  },
+  {
+    "rank": 6,
+    "model": "PixVerse V6 [720p]",
+    "organization": "Aishi Technology",
+    "rank_score": 1114.4,
+    "ci_95": "+26.3/-25.8",
+    "battles": 3899,
+    "release_date": "2026.03"
+  },
+  {
+    "rank": 7,
+    "model": "可灵 2.5 Turbo [1080p]",
+    "organization": "Kuaishou Technology",
+    "rank_score": 1103.9,
+    "ci_95": "+32.3/-28.2",
+    "battles": 2973,
+    "release_date": "2025.09"
+  },
+  {
+    "rank": 8,
+    "model": "HappyHorse-1.0 [1080p]",
+    "organization": "Alibaba",
+    "rank_score": 1100.2,
+    "ci_95": "+36.4/-37.4",
+    "battles": 1725,
+    "release_date": "2026.04"
+  },
+  {
+    "rank": 9,
+    "model": "Seedance 1.0 [1080p]",
+    "organization": "ByteDance",
+    "rank_score": 1072.0,
+    "ci_95": "+29.2/-29.9",
+    "battles": 3021,
+    "release_date": "2025.06"
+  },
+  {
+    "rank": 10,
+    "model": "Wan 2.7 [1080p]",
+    "organization": "Alibaba",
+    "rank_score": 1071.8,
+    "ci_95": "+36.1/-33.6",
+    "batt
