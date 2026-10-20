@@ -1,9 +1,19 @@
+import sys
+import os
 import json
 import asyncio
 import hashlib
 from datetime import datetime
+import requests
 import asyncpg
+
+# Add the parent/target directory to sys.path to import config.py
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../ai-trade-api')))
+# Fallback in case the script is run from the directory above
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import config
+
+DATASET_URL = "https://www.llmrates.ai/api/dataset"
 
 def parse_iso_datetime(dt_str: str | None) -> datetime | None:
     """Safely converts ISO datetime string from JSON into a Python datetime object for asyncpg."""
@@ -18,10 +28,13 @@ def compute_price_hash(pr: dict) -> str:
     price_signature = f"{pr.get('inputPricePerMillion')}|{pr.get('cachedInputPricePerMillion')}|{pr.get('outputPricePerMillion')}|{pr.get('thinkingOutputPricePerMillion')}|{pr.get('imagePrice')}|{pr.get('videoPricePerSecond')}"
     return hashlib.md5(price_signature.encode('utf-8')).hexdigest()
 
-async def sync_daily_llm_prices(json_file_path: str):
-    print(f"📦 Syncing dataset: {json_file_path}...")
-    with open(json_file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+async def sync_daily_llm_prices(url: str):
+    print(f"📦 Fetching live dataset from: {url}...")
+    
+    # Download the dataset
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    data = response.json()
 
     conn = await asyncpg.connect(config.DATABASE_URL)
     
@@ -122,4 +135,4 @@ async def sync_daily_llm_prices(json_file_path: str):
         await conn.close()
 
 if __name__ == "__main__":
-    asyncio.run(sync_daily_llm_prices("llm_price.json"))
+    asyncio.run(sync_daily_llm_prices(DATASET_URL))
