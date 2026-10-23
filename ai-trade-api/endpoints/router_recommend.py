@@ -12,7 +12,6 @@ async def recommend_fastest_model(
     region: str = Query("us-east", description="Region for live status latency routing"),
     auth=Depends(auth_dependency)
 ):
-    # Normalize category input
     category = category.lower()
     valid_categories = ["general", "image", "video"]
     
@@ -22,26 +21,14 @@ async def recommend_fastest_model(
             detail=f"Invalid category. Supported categories are: {', '.join(valid_categories)}"
         )
 
-    # Fetch live telemetry metrics from Redis using the new provider-based keys
     raw_data = await db.redis_client.hgetall(f"live_provider_status:{region}")
     if not raw_data:
-        # Fallback to alternative region if cache is empty
         raw_data = await db.redis_client.hgetall("live_provider_status:tokyo")
 
-    # Dynamic pricing filter based on category to match `prices_realtime.py` logic
-    pricing_filter = ""
-    if category == "image":
-        pricing_filter = "AND cp.image_price IS NOT NULL"
-    elif category == "video":
-        pricing_filter = "AND cp.video_price_per_second IS NOT NULL"
-    elif category == "general":
-        pricing_filter = "AND cp.image_price IS NULL AND cp.video_price_per_second IS NULL"
-
-    # SQL query: Ranks models by category, extracts the latest active model per provider 
-    # that MATCHES the category criteria (using MAX model_id to break ties), 
-    # ensures deprecated_at is null, and fetches their current and previous 30-day prices.
-    query = f"""
-        WITH ranked_prices AS (
+    # SQL query: Categories are now strictly dictated by llm_ranking, 
+    # so we remove the dynamic pricing column filters entirely.
+    query = """
+        WITH all_prices AS (
             SELECT 
                 h.model_id, h.processing_tier, h.tier_label, h.price_unit,
                 h.input_price_per_1m, h.cached_input_price_per_1m,
@@ -54,31 +41,33 @@ async def recommend_fastest_model(
             FROM llm_prices h
             WHERE h.recorded_at >= NOW() - INTERVAL '30 days'
         ),
-        current_p AS (SELECT * FROM ranked_prices WHERE prn = 1),
-        previous_p AS (SELECT * FROM ranked_prices WHERE prn = 2),
-        
-        -- Apply the category filter FIRST so MAX(model_id) only picks from valid models
-        -- Use DISTINCT to avoid duplicating models that have multiple pricing tiers
-        filtered_models AS (
-            SELECT DISTINCT m.model_id, m.provider_id, m.slug, m.display_name
-            FROM llm_models m
-            JOIN current_p cp ON m.model_id = cp.model_id
-            WHERE m.is_active = true 
-              AND m.deprecated_at IS NULL
-              {pricing_filter}
-        ),
-        latest_provider_model AS (
-            SELECT provider_id, MAX(model_id) as latest_model_id
-            FROM filtered_models
-            GROUP BY provider_id
+        current_p AS (SELECT * FROM all_prices WHERE prn = 1),
+        previous_p AS (
+            SELECT DISTINCT ON (ap.model_id, ap.processing_tier, ap.tier_label) ap.*
+            FROM all_prices ap
+            JOIN current_p cp 
+              ON ap.model_id = cp.model_id 
+             AND ap.processing_tier = cp.processing_tier 
+             AND ap.tier_label = cp.tier_label
+            WHERE ap.prn > 1
+              AND (
+                  ap.input_price_per_1m IS DISTINCT FROM cp.input_price_per_1m OR
+                  ap.cached_input_price_per_1m IS DISTINCT FROM cp.cached_input_price_per_1m OR
+                  ap.output_price_per_1m IS DISTINCT FROM cp.output_price_per_1m OR
+                  ap.cached_price_per_1m IS DISTINCT FROM cp.cached_price_per_1m OR
+                  ap.thinking_output_price_per_1m IS DISTINCT FROM cp.thinking_output_price_per_1m OR
+                  ap.image_price IS DISTINCT FROM cp.image_price OR
+                  ap.video_price_per_second IS DISTINCT FROM cp.video_price_per_second
+              )
+            ORDER BY ap.model_id, ap.processing_tier, ap.tier_label, ap.recorded_at DESC
         )
         
         SELECT 
             r.rank,
             p.name AS provider_name,
-            fm.model_id,
-            fm.slug AS model_slug,
-            fm.display_name AS model_name,
+            m.model_id,
+            m.slug AS model_slug,
+            m.display_name AS model_name,
             cp.processing_tier, cp.tier_label, cp.price_unit,
             
             -- Current Prices
@@ -103,9 +92,9 @@ async def recommend_fastest_model(
             
             -- Trends and Diffs
             CASE 
-                WHEN pp.input_price_per_1m IS NULL THEN 'UNCHANGED'
-                WHEN cp.input_price_per_1m < pp.input_price_per_1m THEN 'DECREASED'
-                WHEN cp.input_price_per_1m > pp.input_price_per_1m THEN 'INCREASED'
+                WHEN pp.input_price_per_1m IS NULL AND pp.image_price IS NULL AND pp.video_price_per_second IS NULL THEN 'UNCHANGED'
+                WHEN COALESCE(cp.input_price_per_1m, cp.image_price, cp.video_price_per_second) < COALESCE(pp.input_price_per_1m, pp.image_price, pp.video_price_per_second) THEN 'DECREASED'
+                WHEN COALESCE(cp.input_price_per_1m, cp.image_price, cp.video_price_per_second) > COALESCE(pp.input_price_per_1m, pp.image_price, pp.video_price_per_second) THEN 'INCREASED'
                 ELSE 'UNCHANGED'
             END AS input_price_trend_30d,
             ROUND(COALESCE(cp.input_price_per_1m - pp.input_price_per_1m, 0.0), 6) AS input_price_diff_30d,
@@ -118,14 +107,15 @@ async def recommend_fastest_model(
 
         FROM llm_ranking r
         JOIN providers p ON r.provider_id = p.provider_id
-        JOIN latest_provider_model lpm ON r.provider_id = lpm.provider_id
-        JOIN filtered_models fm ON lpm.latest_model_id = fm.model_id
-        JOIN current_p cp ON fm.model_id = cp.model_id
+        JOIN llm_models m ON (m.slug = r.model_name OR m.model_id = r.model_name) AND m.provider_id = r.provider_id
+        JOIN current_p cp ON m.model_id = cp.model_id
         LEFT JOIN previous_p pp 
             ON cp.model_id = pp.model_id 
            AND cp.processing_tier = pp.processing_tier 
            AND cp.tier_label = pp.tier_label
         WHERE r.category = $1
+          AND m.is_active = true 
+          AND m.deprecated_at IS NULL
         ORDER BY r.rank, cp.processing_tier;
     """
 
@@ -141,9 +131,7 @@ async def recommend_fastest_model(
         m_id = r["model_id"]
         provider_name = r["provider_name"]
         
-        # Initialize the model's group if it's the first time we see it
         if m_id not in recommendations_dict:
-            # Parse live status from Redis telemetry payload matching the provider name
             live_stat = json.loads(raw_data.get(provider_name, "{}")) if raw_data else {}
             
             recommendations_dict[m_id] = {
@@ -156,12 +144,11 @@ async def recommend_fastest_model(
                 "tiers": []
             }
         
-        # Calculate price differences and change boolean flag
         diffs = {}
         prev_price = None
         has_changed = False
         
-        if r["previous_input_price"] is not None:
+        if r["previous_recorded_at"] is not None:
             diffs = {
                 "input_price_diff_30d": float(r["input_price_diff_30d"]),
                 "cached_input_price_diff_30d": float(r["cached_input_price_diff_30d"]),
@@ -171,7 +158,6 @@ async def recommend_fastest_model(
                 "image_price_diff_30d": float(r["image_price_diff_30d"]),
                 "video_price_diff_30d": float(r["video_price_diff_30d"])
             }
-            # True if ANY of the prices changed over 30 days
             has_changed = any(val != 0.0 for val in diffs.values())
             
             prev_price = {
@@ -185,7 +171,6 @@ async def recommend_fastest_model(
                 "recorded_at": r["previous_recorded_at"].isoformat() if r["previous_recorded_at"] else None
             }
 
-        # Append specific tier pricing to the model
         if r["processing_tier"] is not None:
             recommendations_dict[m_id]["tiers"].append({
                 "processing_tier": r["processing_tier"],
@@ -209,7 +194,6 @@ async def recommend_fastest_model(
                 }
             })
 
-    # Sort the dictionary strictly by the database rank
     final_recommendations = sorted(list(recommendations_dict.values()), key=lambda x: x["rank"])
 
     resp = CustomJSONResponse(content={

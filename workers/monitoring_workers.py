@@ -16,37 +16,48 @@ WORKER_REGION = os.getenv("WORKER_REGION", "us-east")
 # Live probe endpoints for high-frequency latency testing
 TARGET_PROBE_MODELS = [
     {
-        "id": "deepseek/deepseek-chat", 
-        "provider": "DeepSeek", 
-        "endpoint": "https://api.deepseek.com/v1/chat/completions", 
-        "api_key": os.getenv("DEEPSEEK_KEY", "")
+        "id": "deepseek/deepseek-chat",
+        "provider": "DeepSeek",
+        "endpoint": "https://api.deepseek.com/v1/chat/completions",
+        "api_key": os.environ.get("DEEPSEEK_KEY", "")
     },
     {
-        "id": "qwen/qwen-max", 
-        "provider": "Alibaba", 
-        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", 
-        "api_key": os.getenv("QWEN_KEY", "")
+        "id": "qwen/qwen-max",
+        "provider": "Qwen",
+        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "api_key": os.environ.get("QWEN_KEY", "")
     },
     {
-        "id": "moonshot/kimi-k2.7-code", 
-        "provider": "Moonshot", 
-        "endpoint": "https://api.moonshot.cn/v1/chat/completions", 
-        "api_key": os.getenv("KIMI_KEY", "")
+        "id": "moonshot/kimi-k2.7-code",
+        "provider": "Moonshot",
+        "endpoint": "https://api.moonshot.cn/v1/chat/completions",
+        "api_key": os.environ.get("KIMI_KEY", "")
     },
     {
-        "id": "zhipu/glm-5.3-flash", 
-        "provider": "Zhipu", 
-        "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions", 
-        "api_key": os.getenv("GLM_KEY", "")
+        "id": "zhipu/glm-5.3-flash",
+        "provider": "Zhipu",
+        "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "api_key": os.environ.get("GLM_KEY", "")
     },
     {
-        "id": "xiaomi/mimo-v2.6-pro", 
-        "provider": "Xiaomi", 
-        "endpoint": "https://api.xiaomimimo.com/v1/chat/completions", 
-        "api_key": os.getenv("MIMO_KEY", os.getenv("XIAOMI_KEY", ""))
-    }    
+        "id": "Volcano Ark/doubao-seed-2-1-lite-260915",
+        "provider": "Volcano Ark",
+        "endpoint": "https://ark.cn-beijing.volces.com/api/v3/responses",
+        "api_key": os.environ.get("DOUBAO_KEY", "")
+    },
+    {
+        "id": "MiniMax/MiniMax-M3",
+        "provider": "MiniMax",
+        "endpoint": "https://api.minimax.cn/v1/text/chatcompletion_v2",
+        "api_key": os.environ.get("MINIMAX_KEY", "")
+    },     
+    {
+        "id": "xiaomi/mimo-v2.6-pro",
+        "provider": "Xiaomi",
+        "endpoint": "https://api.xiaomimimo.com/v1/chat/completions",
+        "api_key": os.environ.get("MIMO_KEY", os.environ.get("XIAOMI_KEY", ""))
+    }
 ]
-
 # --- LIVE SYNTHETIC PROBE WORKER ---
 async def probe_llm_service(client: httpx.AsyncClient, model: dict, region: str = "us-east"):
     """Pings an LLM endpoint and posts latency telemetry to the central API gateway via HTTP."""

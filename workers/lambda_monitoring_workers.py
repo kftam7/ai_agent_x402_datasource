@@ -19,7 +19,7 @@ TARGET_PROBE_MODELS = [
     },
     {
         "id": "qwen/qwen-max",
-        "provider": "Alibaba",
+        "provider": "Qwen",
         "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
         "api_key": os.environ.get("QWEN_KEY", "")
     },
@@ -35,6 +35,18 @@ TARGET_PROBE_MODELS = [
         "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
         "api_key": os.environ.get("GLM_KEY", "")
     },
+    {
+        "id": "Volcano Ark/doubao-seed-2-1-lite-260915",
+        "provider": "Volcano Ark",
+        "endpoint": "https://ark.cn-beijing.volces.com/api/v3/responses",
+        "api_key": os.environ.get("DOUBAO_KEY", "")
+    },
+    {
+        "id": "MiniMax/MiniMax-M3",
+        "provider": "MiniMax",
+        "endpoint": "https://api.minimax.cn/v1/text/chatcompletion_v2",
+        "api_key": os.environ.get("MINIMAX_KEY", "")
+    },     
     {
         "id": "xiaomi/mimo-v2.6-pro",
         "provider": "Xiaomi",
