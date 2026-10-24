@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 # --- CONFIGURATION (set these as Lambda Environment Variables) ---
 CENTRAL_API_URL = os.environ.get("CENTRAL_API_URL", "http://localhost:8000/v1/telemetry/report")
 WORKER_SECRET = os.environ.get("WORKER_SECRET", "your-internal-worker-secret-key")
-WORKER_REGION = os.environ.get("WORKER_REGION", "us-east-1")
+WORKER_REGION = os.environ.get("WORKER_REGION", "us-east")
 
 # Live probe endpoints
 TARGET_PROBE_MODELS = [
@@ -38,7 +38,7 @@ TARGET_PROBE_MODELS = [
     {
         "id": "Volcano Ark/doubao-seed-2-1-lite-260915",
         "provider": "Volcano Ark",
-        "endpoint": "https://ark.cn-beijing.volces.com/api/v3/responses",
+        "endpoint": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
         "api_key": os.environ.get("DOUBAO_KEY", "")
     },
     {
@@ -46,7 +46,7 @@ TARGET_PROBE_MODELS = [
         "provider": "MiniMax",
         "endpoint": "https://api.minimax.cn/v1/text/chatcompletion_v2",
         "api_key": os.environ.get("MINIMAX_KEY", "")
-    },     
+    }, 
     {
         "id": "xiaomi/mimo-v2.6-pro",
         "provider": "Xiaomi",

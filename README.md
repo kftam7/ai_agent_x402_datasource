@@ -19,6 +19,7 @@ Command to dump DB
 pg_dump -U username -h localhost -p 5432 -d database_name -f backup_file.sql
 
 
+
 Command to flush Redis DB
 ------
 redis-cli FLUSHDB

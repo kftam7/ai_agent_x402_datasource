@@ -42,7 +42,7 @@ TARGET_PROBE_MODELS = [
     {
         "id": "Volcano Ark/doubao-seed-2-1-lite-260915",
         "provider": "Volcano Ark",
-        "endpoint": "https://ark.cn-beijing.volces.com/api/v3/responses",
+        "endpoint": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
         "api_key": os.environ.get("DOUBAO_KEY", "")
     },
     {

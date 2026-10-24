@@ -92,12 +92,23 @@ async def sync_daily_llm_prices(url: str):
                 )
 
                 # 3. CDC Deduplicated Insert into llm_prices
-                prices = m.get("prices", [])
+                raw_prices = m.get("prices", [])
+                
+                # Sort deterministically to ignore random upstream array shuffling
+                prices = sorted(raw_prices, key=lambda x: json.dumps(x, sort_keys=True))
+                seen_tiers = set() # Track unique tiers per model in this payload
+                
                 for pr in prices:
                     tier = pr.get("processingTier") or "standard"
                     tier_label = pr.get("tierLabel") or "default"
                     if tier_label.startswith("{priceOf!"):
                         tier_label = "standard_tier"
+
+                    # Skip duplicate tiers in the same API payload to prevent ping-pong history inserts
+                    tier_key = f"{tier}_{tier_label}"
+                    if tier_key in seen_tiers:
+                        continue
+                    seen_tiers.add(tier_key)
 
                     current_hash = compute_price_hash(pr)
 
